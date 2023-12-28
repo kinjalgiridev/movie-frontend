@@ -10,33 +10,32 @@ const NewMovieForm = () => {
   const [poster, setPoster] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
   const router = useRouter();
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
-      // Create FormData object to send the form data, including the poster file
       const formData = new FormData();
-      formData.append("userid", "658ba0360b2ae7e67af1879e");
       formData.append("title", title);
       formData.append("publishingYear", publishingYear);
       formData.append("poster", poster);
-
-      // Make a POST request to your server
-      const response = await fetch("http://localhost:5000/movie/movies", {
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/movies`, {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InZpc2hhbGh0dEBnbWFpbC5jb20iLCJpYXQiOjE3MDM2NTEyMDYsImV4cCI6MTcwMzY1NDgwNn0.05tw9Yt8iCRC1l6GvjykLT4yfQPVcw7N6OvfUJ47yr8`,
+          'Content-Type': 'application/json',
+          Authorization: token ? `${token}` : '',
         },
       });
 
       if (response.ok) {
-        console.log("Movie created successfully");
-
         router.push("/list");
       } else {
         console.error("Error creating movie:", response.statusText);
+        localStorage.removeItem('token');
+        router.push('/'); 
       }
     } catch (error) {
       console.error("Error creating movie:", error.message);

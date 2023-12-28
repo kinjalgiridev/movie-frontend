@@ -2,32 +2,40 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import vector from "../public/Vectors.png";
+import { useRouter } from "next/router";
+
 function list() {
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(8);
 
+  const router = useRouter();
+  
   useEffect(() => {
     const fetchMovies = async () => {
       try {
+        const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:5000/movie/getall?page=${currentPage}&limit=${itemsPerPage}`,
+          `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/getall?page=${currentPage}&limit=${itemsPerPage}`,
           {
             method: "GET",
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: token ? `${token}` : '',
+            },
           }
         );
 
-        console.log("Response Status:", response.status);
-
         if (response.ok) {
           const data = await response.json();
-          if (data) {
-            setMovies(data.movies);
-            setTotalPages(data.totalPages);
-          }
+          setMovies(data.movies);
+          setTotalPages(data.totalPages);
+          setCurrentPage(data.currentPage);
         } else {
-          console.error("Failed to fetch movies. Response not okay:", response);
+          localStorage.removeItem('token');
+          localStorage.removeItem('userid');
+          router.push('/'); 
         }
       } catch (error) {
         console.error("Error:", error);
@@ -39,6 +47,12 @@ function list() {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleLogOut = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userid');
+    router.push('/'); 
   };
   return (
     <>
@@ -97,7 +111,7 @@ function list() {
 
               <div className="logout text-white">
                 Logout
-                <Link href="/">
+                <button className="simpleBtn" onClick={()=> handleLogOut()}>
                   <span className="icon ms-3">
                     <svg
                       width="32"
@@ -112,7 +126,7 @@ function list() {
                       />
                     </svg>
                   </span>
-                </Link>
+                </button>
               </div>
             </div>
           </div>
