@@ -1,0 +1,32 @@
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .movieList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .movieCard {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .movieCard img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .movieInfo {
+    padding: 10px;
+    background-color: #f0f0f0;
+  }
+  
+  /* Add more styles as needed */
+  
