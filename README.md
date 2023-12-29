@@ -104,22 +104,3 @@ movie-app/
    - `newmovie.module.css`, `reset.css`, `global.css`, `index.module.css`, `Home.module.css`: These are CSS files for styling different parts or components of the application.
 
 Using Next.js, given the use of the `pages` directory for routing. Each JavaScript file in the `pages` directory corresponds to a different view or route in the web app, and the `components` directory includes reusable parts of the UI. The `styles` directory holds the CSS files for styling, and `public` is for static assets like images. The `package.json` and `package-lock.json` are standard in Node.js-based projects for managing dependencies.
-
-## Start the Development Server
-
-1. In the terminal, run:
-
-   ```bash
-   npm start
-   ```
-
-2. This will start the development server and open your app in a new browser window. You can access it at [http://localhost:3000/](http://localhost:3000/).
-
-## Available Scripts
-
-In the project directory, you can run the following scripts:
-
-- `npm start`: Runs the app in development mode.
-- `npm test`: Launches the test runner.
-- `npm run build`: Builds the app for production to the `build` folder.
-- `npm run eject`: Ejects the app from Create React App configuration.
