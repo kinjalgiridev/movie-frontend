@@ -30,3 +30,5 @@ The project is organized into four main pages:
    ```bash
    git clone https://github.com/your-username/movie-app.git
    ```
+
+   
