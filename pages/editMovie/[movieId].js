@@ -5,6 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import vector from "../../public/Vectors.png";
 
+import Auth from "../../components/Auth/Auth";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../../contexts/authContext";
+
 const EditMovie = () => {
   const router = useRouter();
   const { movieId } = router.query;
@@ -12,37 +17,41 @@ const EditMovie = () => {
   const [publishingYear, setPublishingYear] = useState("");
   const [poster, setPoster] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
+  const { user } = useAuth();
+  const showToast = (message, type) => {
+    toast[type](message, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+    });
+  };
 
-  
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
-        const token = localStorage.getItem("token");
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/movies/${movieId}`,
           {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: token ? `${token}` : "",
             },
           }
         );
 
         if (response.ok) {
           const data = await response.json();
-          if (data) {
-            setTitle(data.title);
-            setPublishingYear(data.publishingYear);
-          }
+          setTitle(data.title);
+          setPublishingYear(data.publishingYear);
         } else {
-          localStorage.removeItem("token");
-          localStorage.removeItem("userid");
-          router.push("/");
-          console.error("Failed to fetch movies. Response not okay:", response);
+          const errorData = await response.json();
+          throw new Error(`${response.status} - ${errorData.message}`);
         }
       } catch (error) {
-        console.error("Error:", error);
+        showToast(error.toString(), "error");
+        console.error(error);
       }
     };
 
@@ -53,11 +62,8 @@ const EditMovie = () => {
     e.preventDefault();
 
     try {
-
       const formData = new FormData();
-      const token = localStorage.getItem("token");
-      const userid = localStorage.getItem('userid');
-      formData.append("userid", userid);
+      formData.append("userid", user._id);
       formData.append("title", title);
       formData.append("publishingYear", publishingYear);
       formData.append("poster", poster);
@@ -69,21 +75,20 @@ const EditMovie = () => {
           body: formData,
           headers: {
             "Content-Type": "application/json",
-            Authorization: token ? `${token}` : "",
           },
         }
       );
 
       if (response.ok) {
+        showToast("Movie Updated successfully", "success");
         router.push("/list");
       } else {
-        console.error("Error creating movie:", response.statusText);
-        localStorage.removeItem("token");
-        localStorage.removeItem("userid");
-        router.push("/");
+        const errorData = await response.json(); 
+        throw new Error(`${response.status} - ${errorData.message}`);
       }
     } catch (error) {
-      console.error("Error creating movie:", error.message);
+      showToast(error.toString(), "error");
+      console.error(error);
     }
   };
 
@@ -96,7 +101,7 @@ const EditMovie = () => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <>
+    <Auth>
       <div className="containerMovie pb-3" style={{ height: "auto" }}>
         <div
           className="container d-flex justify-content-start"
@@ -179,7 +184,7 @@ const EditMovie = () => {
           <Image src={vector} alt="Your Alt Text" style={{ width: "100vw" }} />
         </div>
       </div>
-    </>
+    </Auth>
   );
 };
 

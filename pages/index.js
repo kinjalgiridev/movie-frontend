@@ -5,13 +5,14 @@ import vector from "../public/Vectors.png";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../contexts/authContext";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
-
+  const { login } = useAuth();
   const showToast = (message, type) => {
     toast[type](message, {
       position: "top-right",
@@ -35,12 +36,15 @@ const SignIn = () => {
       });
       if (response.status === 200) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
+        login(data.user);
         showToast("Login successful", "success");
         router.push('/list'); 
+      }else{
+        const errorData = await response.json(); 
+        throw new Error(`${response.status} - ${errorData.message}`);
       }
     } catch (error) {
-      showToast("Invalid email or password", "error");
+      showToast(error.toString(), "error");
       console.error(error);
     }
   };
