@@ -4,7 +4,7 @@ import { useDropzone } from "react-dropzone";
 import Link from "next/link";
 import Image from "next/image";
 import vector from "../../public/Vectors.png";
-require("dotenv").config();
+
 const EditMovie = () => {
   const router = useRouter();
   const { movieId } = router.query;
