@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import Link from "next/link";
 import Image from "next/image";
 import vector from "../../public/Vectors.png";
+require("dotenv").config();
 const EditMovie = () => {
   const router = useRouter();
   const { movieId } = router.query;
@@ -12,26 +13,32 @@ const EditMovie = () => {
   const [poster, setPoster] = useState("");
   const [selectedFileName, setSelectedFileName] = useState("");
 
+  
   useEffect(() => {
     const fetchMovieDetail = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:5000/movie/movies/${movieId}`,
+          `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/movies/${movieId}`,
           {
             method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token ? `${token}` : "",
+            },
           }
         );
-
-        console.log("Response Status:", response.status);
 
         if (response.ok) {
           const data = await response.json();
           if (data) {
-            // setMovie(data);
             setTitle(data.title);
             setPublishingYear(data.publishingYear);
           }
         } else {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userid");
+          router.push("/");
           console.error("Failed to fetch movies. Response not okay:", response);
         }
       } catch (error) {
@@ -46,30 +53,34 @@ const EditMovie = () => {
     e.preventDefault();
 
     try {
-      // Create FormData object to send the form data, including the poster file
+
       const formData = new FormData();
-      formData.append("userid", "658ba0360b2ae7e67af1879e");
+      const token = localStorage.getItem("token");
+      const userid = localStorage.getItem('userid');
+      formData.append("userid", userid);
       formData.append("title", title);
       formData.append("publishingYear", publishingYear);
       formData.append("poster", poster);
 
-      // Make a POST request to your server
       const response = await fetch(
-        `http://localhost:5000/movie/movies/${movieId}`,
+        `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/movies/${movieId}`,
         {
           method: "PATCH",
           body: formData,
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InZpc2hhbGh0dEBnbWFpbC5jb20iLCJpYXQiOjE3MDM2NTEyMDYsImV4cCI6MTcwMzY1NDgwNn0.05tw9Yt8iCRC1l6GvjykLT4yfQPVcw7N6OvfUJ47yr8`,
+            "Content-Type": "application/json",
+            Authorization: token ? `${token}` : "",
           },
         }
       );
 
       if (response.ok) {
-        console.log("Movie updated successfully");
         router.push("/list");
       } else {
         console.error("Error creating movie:", response.statusText);
+        localStorage.removeItem("token");
+        localStorage.removeItem("userid");
+        router.push("/");
       }
     } catch (error) {
       console.error("Error creating movie:", error.message);
@@ -98,7 +109,10 @@ const EditMovie = () => {
             Edit
           </label>
         </div>
-        <div className="container" style={{ paddingLeft: "100px", paddingBottom:"150px" }}>
+        <div
+          className="container"
+          style={{ paddingLeft: "100px", paddingBottom: "150px" }}
+        >
           <div className="row">
             <div className="col-md-6">
               <div {...getRootProps()} className="dropzone">
@@ -143,7 +157,6 @@ const EditMovie = () => {
                     <button
                       type="button"
                       className="cancelBtn px-5 py-3"
-                      onClick={() => console.log("Cancel clicked")}
                       style={{ width: "100%" }}
                     >
                       <span className="submitText py-3">Cancel</span>

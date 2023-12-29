@@ -5,6 +5,7 @@ import vector from "../public/Vectors.png";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,14 +25,23 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const hardcodedEmail = "admin@gmail.com";
-    const hardcodedPassword = "123456";
-
-    if (email === hardcodedEmail && password === hardcodedPassword) {
-      showToast("Login successful!", "success");
-      router.push("/list");
-    } else {
-      showToast("Login failed. Please check your credentials.", "error");
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_PATH}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.status === 200) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        showToast("Login successful", "success");
+        router.push('/list'); 
+      }
+    } catch (error) {
+      showToast("Invalid email or password", "error");
+      console.error(error);
     }
   };
 
