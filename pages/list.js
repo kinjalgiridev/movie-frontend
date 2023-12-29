@@ -3,26 +3,35 @@ import Link from "next/link";
 import Image from "next/image";
 import vector from "../public/Vectors.png";
 import { useRouter } from "next/router";
-
+import Auth from "../components/Auth/Auth";
+import { useAuth } from "../contexts/authContext";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function list() {
   const [movies, setMovies] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage] = useState(8);
-
   const router = useRouter();
-  
+  const { logout } = useAuth();
+  const showToast = (message, type) => {
+    toast[type](message, {
+      position: "top-right",
+      autoClose: 1500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+    });
+  };
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/getall?page=${currentPage}&limit=${itemsPerPage}`,
           {
             method: "GET",
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: token ? `${token}` : '',
+              "Content-Type": "application/json",
             },
           }
         );
@@ -33,12 +42,12 @@ function list() {
           setTotalPages(data.totalPages);
           setCurrentPage(data.currentPage);
         } else {
-          localStorage.removeItem('token');
-          localStorage.removeItem('userid');
-          router.push('/'); 
+          const errorData = await response.json();
+          throw new Error(`${response.status} - ${errorData.message}`);
         }
       } catch (error) {
-        console.error("Error:", error);
+        showToast(error.toString(), "error");
+        console.error(error);
       }
     };
 
@@ -50,12 +59,11 @@ function list() {
   };
 
   const handleLogOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userid');
-    router.push('/'); 
+    logout();
+    router.push("/");
   };
   return (
-    <>
+    <Auth>
       {movies.length === 0 ? (
         <div className="containerMovie">
           <div className="container d-flex justify-content-center">
@@ -111,7 +119,7 @@ function list() {
 
               <div className="logout text-white">
                 Logout
-                <button className="simpleBtn" onClick={()=> handleLogOut()}>
+                <button className="simpleBtn" onClick={() => handleLogOut()}>
                   <span className="icon ms-3">
                     <svg
                       width="32"
@@ -195,7 +203,7 @@ function list() {
           </div>
         </div>
       )}
-    </>
+    </Auth>
   );
 }
 
