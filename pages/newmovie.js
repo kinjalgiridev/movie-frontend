@@ -33,7 +33,6 @@ const NewMovieForm = () => {
       formData.append("title", title);
       formData.append("publishingYear", publishingYear);
       formData.append("poster", poster);
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_PATH}/movie/movies`,
         {
