@@ -4,6 +4,7 @@ import { useDropzone } from "react-dropzone";
 import Link from "next/link";
 import Image from "next/image";
 import vector from "../../public/Vectors.png";
+
 import Auth from "../../components/Auth/Auth";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
